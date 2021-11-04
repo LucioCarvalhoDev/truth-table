@@ -1,14 +1,13 @@
 import * as readline from 'readline';
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
 /**
  * @returns {string}
  */
 function prompt(query = '') {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
     return new Promise(resolve => {
         rl.question(query, (res) => {
             rl.close();
@@ -17,6 +16,9 @@ function prompt(query = '') {
     });
 }
 
+/**
+ *  @returns {void}
+ */
 async function truthTable() {
     let expression = await prompt("INSIRA A EXPRESSÂO BOOLEANA: ");
     expression = expression
@@ -29,7 +31,7 @@ async function truthTable() {
     terms = Array.from(new Set(terms));
 
     const res = [];
-    const rKey = Symbol('rKey');
+    const resKey = Symbol('resKey');
 
     for (let i = 0; i < 2 ** terms.length; i++) {
         const termsAndValues = {};
@@ -40,31 +42,31 @@ async function truthTable() {
             termsAndValues[value] = values[values.length - idx - 1];
         });
 
-        // declaration
         for (let prop in termsAndValues) {
             str += `let ${prop} = ${termsAndValues[prop]};`;
         }
 
         str += expression;
 
-        res[i] = { ...termsAndValues, [rKey]: !!eval(str) };
+        res[i] = { ...termsAndValues, [resKey]: !!eval(str) };
     }
 
     function assembleTable(terms, resolutions) {
         const header = `${terms.map(n => `|  ${n}  `)}|  r  |\n`.replace(',', '');
         const lines = resolutions.map(line => {
             let str = '';
+
             for (let prop in line) {
                 str += `|  ${line[prop]}  `;
             }
 
-            return str + `|  ${Number(line[rKey])}  |` + '\n';
+            return str + `|  ${Number(line[resKey])}  |` + '\n';
         }).join('');
 
         return (header + lines).replace(',', '');
     }
-    console.log(assembleTable(terms, res));
 
+    console.log(assembleTable(terms, res));
 }
 
-(await truthTable());
+truthTable();
